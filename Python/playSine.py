@@ -22,9 +22,9 @@ elif platform == "win32" or platform == "cygwin":
 else:
     raise Exception('OS not understood, please use a supported OS')
 
-# breakpoint()
 # Get a list of the available audio devices and find the one corresponding to the neuroDAC
 audioDevices = sd.query_devices()
+
 neuroDAC_info = next((device for device in audioDevices if 'U-DAC8' in device['name']), None)
 if not neuroDAC_info:
     raise Exception('No neuroDAC device detected. Please make sure device is plugged in and powered on and drivers are properly installed')
@@ -33,7 +33,6 @@ if not neuroDAC_info:
 # Make data to be streamed
 fs = 44100. # Hz
 duration = 20. # sec
-frame_size = 8192 # samples/buffer frame
 
 t = numpy.arange(0, duration, 1/fs)
 freq = numpy.array([100] * 8) # Frequency of each channel (Hz)
@@ -46,9 +45,8 @@ for channel in range(numChannels):
     data[:, channel] = amp[channel]*numpy.sin(2*pi*freq[channel]*t)
 
 # Play the data!
-# breakpoint()
 print('Starting to play')
 sd.play(
-    data, samplerate=fs, blocksize=frame_size, blocking=True,
+    data, samplerate=fs, blocking=True,
     device=audioDevices.index(neuroDAC_info))
 print('Done')
